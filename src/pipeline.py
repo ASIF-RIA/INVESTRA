@@ -11,7 +11,7 @@ from src.models.train_xgb import train_xgb
 
 
 def run_pipeline() -> dict:
-    df = load_gold_data(settings.data_path)
+    df = load_gold_data(settings.data_paths)
     df_feat = build_features(df)
     x, y = training_matrix(df_feat)
     split = int(len(df_feat) * settings.train_ratio)

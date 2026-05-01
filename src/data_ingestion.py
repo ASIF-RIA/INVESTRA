@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def load_gold_data(path: str) -> pd.DataFrame:
+def _load_single_dataset(path: str) -> pd.DataFrame:
     # Try default CSV first, then fallback to semicolon-delimited files.
     df = pd.read_csv(path)
     if "Date" not in df.columns:
@@ -20,3 +20,25 @@ def load_gold_data(path: str) -> pd.DataFrame:
     df = df.drop_duplicates().dropna(subset=["Date", *cols])
     df = df.set_index("Date").sort_index()
     return df
+
+
+def _merge_datasets(datasets: list[pd.DataFrame]) -> pd.DataFrame:
+    if len(datasets) == 1:
+        return datasets[0]
+
+    merged = datasets[0].copy()
+    for idx, extra_df in enumerate(datasets[1:], start=2):
+        renamed = extra_df.rename(columns={col: f"{col}_ds{idx}" for col in extra_df.columns})
+        merged = merged.join(renamed, how="inner")
+
+    return merged.sort_index()
+
+
+def load_gold_data(paths: str | tuple[str, ...] | list[str]) -> pd.DataFrame:
+    if isinstance(paths, str):
+        path_list = [paths]
+    else:
+        path_list = [path for path in paths if path]
+
+    datasets = [_load_single_dataset(path) for path in path_list]
+    return _merge_datasets(datasets)

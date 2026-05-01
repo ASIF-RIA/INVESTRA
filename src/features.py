@@ -16,7 +16,11 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def training_matrix(df: pd.DataFrame):
-    features = ["Lag_1", "Lag_2", "Lag_3", "MA_7", "MA_30", "Volatility", "Return_1", "Return_7"]
-    x = df[features]
+    base_features = ["Lag_1", "Lag_2", "Lag_3", "MA_7", "MA_30", "Volatility", "Return_1", "Return_7"]
+    extra_numeric = [
+        col for col in df.columns if col not in set(base_features + ["Close"]) and pd.api.types.is_numeric_dtype(df[col])
+    ]
+    features = base_features + extra_numeric
+    x = df[features].ffill().bfill()
     y = df["Close"]
     return x, y

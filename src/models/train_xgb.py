@@ -9,7 +9,7 @@ from src.features import build_features, training_matrix
 
 
 def train_xgb():
-    df = load_gold_data(settings.data_path)
+    df = load_gold_data(settings.data_paths)
     df = build_features(df)
     x, y = training_matrix(df)
 
